@@ -6,7 +6,10 @@ import { getUser } from "./userModel.js";
 export default {
   ADMIN: async function (req, res, next) {
     try {
-      const { userId, agent } = jwt.verify(req.headers.token, "KEYCODE");
+      const { userId, agent } = jwt.verify(
+        req.headers.token,
+        process.env.KEYCODE
+      );
       if (req["headers"]["user-agent"] != agent)
         throw new Error("You use Fake Token! ");
       req.userId = userId;
@@ -23,7 +26,10 @@ export default {
   },
   CHECK: async function (req, res, next) {
     try {
-      const { userId, agent } = jwt.verify(req.headers.token, "KEYCODE");
+      const { userId, agent } = jwt.verify(
+        req.headers.token,
+        process.env.KEYCODE
+      );
       if (req["headers"]["user-agent"] != agent)
         throw new Error("You use Fake Token! ");
       req.userId = userId;
@@ -56,7 +62,7 @@ export default {
         data: {
           token: jwt.sign(
             { userId: user.user_id, agent: req["headers"]["user-agent"] },
-            "KEYCODE"
+            process.env.KEYCODE
           ),
         },
       });
@@ -70,6 +76,7 @@ export default {
   },
   REGISTER: async function (req, res, next) {
     try {
+      console.log(req.files);
       checkData(req.body);
       return next();
     } catch (err) {

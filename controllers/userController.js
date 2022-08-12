@@ -35,7 +35,7 @@ export default {
   },
   POST: async function (req, res) {
     try {
-      let { username, login, password, contact, accaunt, image } = req.body;
+      let { username, login, password, contact, accaunt, user_image } = req.body;
       let [postuser] = await fetch(
         postUser,
         username,
@@ -43,7 +43,7 @@ export default {
         sha256(password),
         contact,
         accaunt,
-        image
+        user_image
       );
 
       res.json({
@@ -52,7 +52,7 @@ export default {
         data: {
           token: jwt.sign(
             { userId: postuser.user_id, agent: req["headers"]["user-agent"] },
-            "KEYCODE"
+            process.env.KEYCODE
           ),
         },
       });
@@ -66,7 +66,8 @@ export default {
   },
   PUT: async function (req, res) {
     try {
-      let { username, login, password, contact, accaunt, image } = req.body;
+      let { username, login, password, contact, accaunt, user_image } =
+        req.body;
       let id = req.userId;
       if (!id) {
         return res.json({
@@ -75,11 +76,11 @@ export default {
           data: [],
         });
       }
-      if (!username && !login && !password && !contact) {
+      if (!username && !login && !password && !contact && !user_image) {
         return res.json({
           status: 402,
           message:
-            "You must send sameone data is 'username', 'login', 'password' or 'contact'",
+            "You must send sameone data is 'username', 'login', 'password' , 'contact' or 'user_image'",
           data: [],
         });
       }
@@ -98,7 +99,8 @@ export default {
         login ?? user.login,
         password ? sha256(password) : user.password,
         contact ?? user.contact,
-        accaunt ?? user.accaunt
+        accaunt ?? user.accaunt,
+        user_image ?? user.user_image
       );
       res.json({
         status: 200,
@@ -106,7 +108,7 @@ export default {
         data: {
           token: jwt.sign(
             { userId: putuser.id, agent: req["headers"]["user-agent"] },
-            "KEYCODE"
+            process.env.KEYCODE
           ),
         },
       });

@@ -26,8 +26,8 @@ export default {
   POST: async function (req, res) {
     try {
       const userId = req.userId;
-      const { name, author, year, janr, top, price } = req.body;
-      if (!name || !author || !year || !janr || !top || !price) {
+      const { name, author, year, janr, book_image, top, price } = req.body;
+      if (!name || !author || !year || !janr || !book_image || !top || !price) {
         return res.json({
           status: 400,
           message:
@@ -42,6 +42,7 @@ export default {
         author,
         year,
         janr,
+        book_image,
         top,
         price
       );
@@ -61,7 +62,7 @@ export default {
   PUT: async function (req, res) {
     try {
       const { id } = req.params;
-      const { name, author, year, janr, top, price } = req.body;
+      const { name, author, year, janr, book_image, top, price } = req.body;
       if (!id) {
         return res.json({
           status: 402,
@@ -69,7 +70,7 @@ export default {
           data: [],
         });
       }
-      if (!name && !author && !year && !janr && !top && !price) {
+      if (!name && !author && !year && !janr && !book_image && !top && !price) {
         return res.json({
           status: 402,
           message:
@@ -92,6 +93,7 @@ export default {
         author ?? book.author,
         year ?? book.year,
         janr ?? book.janr,
+        book_image ?? book.book_image,
         top ?? book.top,
         price ?? book.price
       );

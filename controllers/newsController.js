@@ -25,7 +25,7 @@ export default {
   },
   POST: async function (req, res) {
     try {
-      const { title, description, image_link } = req.body;
+      const { title, description, news_image } = req.body;
       if (!title || !description) {
         return res.json({
           status: 400,
@@ -33,7 +33,7 @@ export default {
           data: [],
         });
       }
-      let [new_s] = await fetch(postNews, title, description, image_link);
+      let [new_s] = await fetch(postNews, title, description, news_image);
       res.json({
         status: 200,
         message: "Add one news!",
@@ -50,7 +50,7 @@ export default {
   PUT: async function (req, res) {
     try {
       const { id } = req.params;
-      const { title, description, image_link } = req.body;
+      const { title, description, news_image } = req.body;
       if (!id) {
         return res.json({
           status: 402,
@@ -58,7 +58,7 @@ export default {
           data: [],
         });
       }
-      if (!title && !description && !image_link) {
+      if (!title && !description && !news_image) {
         return res.json({
           status: 402,
           message: "You must send sameone data is 'title' and 'description'",
@@ -78,7 +78,7 @@ export default {
         id,
         title ?? news.title,
         description ?? news.description,
-        image_link ?? news.image_link
+        news_image ?? news.news_image
       );
       res.json({
         status: 200,
