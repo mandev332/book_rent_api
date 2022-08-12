@@ -1,31 +1,29 @@
-import { fetch } from "../utlls/pg.js";
-
-let SelectUser = `SELECT * from users`;
-
-let PostUser = `INSERT INTO users ( username, login, password, contact, accaunt, image ) values($1,$2,$3,$4,$5,$6) RETURNING *`;
-
-let PutUser = `Update users SET username = $2, login = $3, password = $4, contact= $5, accaunt = $6 WHERE user_id = $1 RETURNING *`;
-
-let DeleteUser = `DELETE from users WHERE user_id = $1 RETURNING *`;
+import { fetch } from "../utils/pg.js";
+import jwt from "jsonwebtoken";
+import sha256 from "sha256";
+import {
+  getUser,
+  postUser,
+  putUser,
+  deleteUser,
+} from "../middlewares/userModel.js";
 
 export default {
   GET: async function (req, res) {
     try {
-      let { id } = req.params;
-      let users = await fetch(
-        SelectUser + (id ? " where user_id = " + id : "")
-      );
+      let userId = req.userId;
+      let users = await fetch(getUser + " where user_id = " + userId);
       if (!users.length) {
         return res.json({
           status: 400,
-          message: id + " - user not found",
+          message: userId + " - user not found",
           data: [],
         });
       }
       res.json({
         status: 200,
-        message: (id ? id : users.length) + " - user",
-        data: id ? users[0] : users,
+        message: (userId ? userId : users.length) + " - user",
+        data: userId ? users[0] : users,
       });
     } catch (err) {
       res.json({
@@ -38,27 +36,25 @@ export default {
   POST: async function (req, res) {
     try {
       let { username, login, password, contact, accaunt, image } = req.body;
-      if (!username || !login || !password || !contact) {
-        return res.json({
-          status: 402,
-          message:
-            "You must send 'username', 'login', 'password' and 'contact'",
-          data: [],
-        });
-      }
       let [postuser] = await fetch(
-        PostUser,
+        postUser,
         username,
         login,
-        password,
+        sha256(password),
         contact,
         accaunt,
         image
       );
+
       res.json({
         status: 200,
         message: "Add new user!",
-        data: postuser,
+        data: {
+          token: jwt.sign(
+            { userId: postuser.user_id, agent: req["headers"]["user-agent"] },
+            "KEYCODE"
+          ),
+        },
       });
     } catch (err) {
       res.json({
@@ -71,7 +67,7 @@ export default {
   PUT: async function (req, res) {
     try {
       let { username, login, password, contact, accaunt, image } = req.body;
-      let { id } = req.params;
+      let id = req.userId;
       if (!id) {
         return res.json({
           status: 402,
@@ -87,7 +83,7 @@ export default {
           data: [],
         });
       }
-      let [user] = await fetch(SelectUser + " where user_id = " + id);
+      let [user] = await fetch(getUser + " where user_id = " + id);
       if (!user) {
         return res.json({
           status: 400,
@@ -96,18 +92,23 @@ export default {
         });
       }
       let [putuser] = await fetch(
-        PutUser,
+        putUser,
         id,
         username ?? user.username,
         login ?? user.login,
-        password ?? user.password,
+        password ? sha256(password) : user.password,
         contact ?? user.contact,
         accaunt ?? user.accaunt
       );
       res.json({
         status: 200,
         message: id + " - update user!",
-        data: putuser,
+        data: {
+          token: jwt.sign(
+            { userId: putuser.id, agent: req["headers"]["user-agent"] },
+            "KEYCODE"
+          ),
+        },
       });
     } catch (err) {
       res.json({
@@ -118,7 +119,7 @@ export default {
     }
   },
   DELETE: async function (req, res) {
-    let { id } = req.params;
+    let id = req.userId;
     if (!id) {
       return res.json({
         status: 402,
@@ -126,7 +127,7 @@ export default {
         data: [],
       });
     }
-    let [deleteuser] = await fetch(DeleteUser, id);
+    let [deleteuser] = await fetch(deleteUser, id);
     return res.json({
       status: 200,
       message: id + " - delete user",

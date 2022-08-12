@@ -1,10 +1,11 @@
 import { Router } from "express";
 import bookController from "../controllers/bookController.js";
+import auth from "../middlewares/auth.js";
 const Bookrouter = Router();
 Bookrouter.get("/", bookController.GET)
   .get("/:id", bookController.GET)
-  .post("/", bookController.POST)
-  .put("/:id", bookController.PUT)
-  .delete("/:id", bookController.DELETE);
+  .post("/", auth.CHECK, bookController.POST)
+  .put("/:id", auth.CHECK, bookController.PUT)
+  .delete("/:id", auth.CHECK, bookController.DELETE);
 
 export default Bookrouter;

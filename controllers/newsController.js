@@ -1,13 +1,10 @@
-import { fetch } from "../utlls/pg.js";
-
-const getNews = `SELECT * FROM news`;
-
-const postNews = `INSERT INTO news (title, description, image_link ) VALUES ($1, $2,$3) RETURNING *`;
-
-const putNews = `UPDATE news SET title = $2, description = $3, image_link = $4 WHERE id = $1 RETURNING *`;
-
-const deleteNews = `DELETE FROM news WHERE id = $1 RETURNING *`;
-
+import { fetch } from "../utils/pg.js";
+import {
+  getNews,
+  postNews,
+  putNews,
+  deleteNews,
+} from "../middlewares/newsModel.js";
 export default {
   GET: async function (req, res) {
     try {

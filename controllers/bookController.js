@@ -1,13 +1,10 @@
-import { fetch } from "../utlls/pg.js";
-
-const getBooks = `SELECT * FROM books`;
-
-const postBook = `INSERT INTO books (user_id, name, author, year, janr, top, price) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`;
-
-const putBook = `UPDATE books SET name = $2, author = $3, year = $4, janr = $5 , top = $6, price = $7 WHERE id = $1 RETURNING *`;
-
-const deleteBook = `DELETE FROM books WHERE id = $1 RETURNING *`;
-
+import { fetch } from "../utils/pg.js";
+import {
+  getBooks,
+  putBook,
+  postBook,
+  deleteBook,
+} from "../middlewares/bookModel.js";
 export default {
   GET: async function (req, res) {
     try {
@@ -28,18 +25,19 @@ export default {
   },
   POST: async function (req, res) {
     try {
-      const { user_id, name, author, year, janr, top, price } = req.body;
-      if (!user_id || !name || !author || !year || !janr || !top || !price) {
+      const userId = req.userId;
+      const { name, author, year, janr, top, price } = req.body;
+      if (!name || !author || !year || !janr || !top || !price) {
         return res.json({
           status: 400,
           message:
-            "You must send 'user_id', 'name', 'author', 'year', 'janr', 'top' and 'price'!",
+            "You must send  'name', 'author', 'year', 'janr', 'top' and 'price'!",
           data: [],
         });
       }
       let [book] = await fetch(
         postBook,
-        user_id,
+        userId,
         name,
         author,
         year,
@@ -63,7 +61,7 @@ export default {
   PUT: async function (req, res) {
     try {
       const { id } = req.params;
-      const { user_id, name, author, year, janr, top, price } = req.body;
+      const { name, author, year, janr, top, price } = req.body;
       if (!id) {
         return res.json({
           status: 402,
@@ -71,7 +69,7 @@ export default {
           data: [],
         });
       }
-      if (!user_id && !name && !author && !year && !janr && !top && !price) {
+      if (!name && !author && !year && !janr && !top && !price) {
         return res.json({
           status: 402,
           message:

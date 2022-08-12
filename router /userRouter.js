@@ -1,10 +1,10 @@
 import { Router } from "express";
 import userController from "../controllers/userController.js";
+import auth from "../middlewares/auth.js";
 const Userrouter = Router();
-Userrouter.get("/", userController.GET)
-  .get("/:id", userController.GET)
-  .post("/", userController.POST)
-  .put("/:id", userController.PUT)
-  .delete("/:id", userController.DELETE);
+
+Userrouter.get("/", auth.CHECK, userController.GET)
+  .put("/", auth.CHECK, userController.PUT)
+  .delete("/", auth.CHECK, userController.DELETE);
 
 export default Userrouter;
