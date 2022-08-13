@@ -5,7 +5,6 @@ import Userrouter from "../router /userRouter.js";
 import Bookrouter from "../router /bookRouter.js";
 import Newsrouter from "../router /newRouter.js";
 import AuthRouter from "../router /authRouter.js";
-import bot from "../botadmin/adminbot.js";
 const app = new express();
 const PORT = process.env.PORT || 5000;
 

@@ -1,4 +1,9 @@
 import { fetch } from "../utils/pg.js";
+import bot from "../botadmin/adminbot.js";
+
+let admin = 1068892555;
+// bot.on("message", async function (msg) {});
+
 import {
   getBooks,
   putBook,
@@ -31,25 +36,51 @@ export default {
         return res.json({
           status: 400,
           message:
-            "You must send  'name', 'author', 'year', 'janr', 'top' and 'price'!",
+            "You must send  'name', 'author', 'year', 'janr', 'book_image', 'top' and 'price'!",
           data: [],
         });
       }
-      let [book] = await fetch(
-        postBook,
-        userId,
-        name,
-        author,
-        year,
-        janr,
-        book_image,
-        top,
-        price
-      );
-      res.json({
-        status: 200,
-        message: "Add one book!",
-        data: book,
+      let desc = `User: ${userId}  \nBook: ${name}\nAuthor: ${author}\nTop: ${top}\nPrice: ${price}`;
+      bot.sendPhoto(admin, "./files/bookImages/photo_2022-07-24_16-56-05.jpg", {
+        caption: desc,
+        parse_mode: "HTML",
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: "✅", callback_data: "valid" },
+              { text: "❌", callback_data: "invalid" },
+            ],
+          ],
+        },
+      });
+      bot.on("callback_query", async (msg) => {
+        console.log(msg.data);
+        if (msg.data == "valid") {
+          let [book] = await fetch(
+            postBook,
+            userId,
+            name,
+            author,
+            year,
+            janr,
+            book_image,
+            top,
+            price
+          );
+
+          res.json({
+            status: 200,
+            message: "Add one book!",
+            data: book,
+          });
+        }
+        if (msg.data == "invalid") {
+          res.json({
+            status: 400,
+            message: "Admin sizning kitobingizni yaroqsiz deb topdi!",
+            data: [],
+          });
+        }
       });
     } catch (err) {
       res.json({
